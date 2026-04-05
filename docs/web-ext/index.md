@@ -18,4 +18,5 @@ Keyboard shortcuts inside the viewer match the [Vue component shortcuts](/vue/co
 
 ## Related
 
+- [Privacy Policy](/web-ext/privacy-policy) — for Chrome Web Store disclosure and users.
 - [Vue component docs](/vue/getting-started) — install `data-visor-vue` in your own app.

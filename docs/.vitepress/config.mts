@@ -30,7 +30,10 @@ export default defineConfig({
       },
       {
         text: 'Web extension',
-        items: [{ text: 'Overview', link: '/web-ext/' }],
+        items: [
+          { text: 'Overview', link: '/web-ext/' },
+          { text: 'Privacy Policy', link: '/web-ext/privacy-policy' },
+        ],
       },
     ],
     socialLinks: [{ icon: 'github', link: 'https://github.com/enzonotario/data-visor' }],
