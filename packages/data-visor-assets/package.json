@@ -1,0 +1,17 @@
+{
+  "name": "data-visor-assets",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "tsx src/generate.tsx"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "takumi-js": "1.0.0-rc.14"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

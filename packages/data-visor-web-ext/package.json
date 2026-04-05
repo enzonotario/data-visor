@@ -1,0 +1,32 @@
+{
+  "name": "data-visor-web-ext",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prebuild": "pnpm --filter data-visor-vue run build",
+    "predev": "pnpm --filter data-visor-vue run build",
+    "dev": "wxt",
+    "build": "wxt build",
+    "test": "vitest run",
+    "postinstall": "wxt prepare",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "zip": "wxt zip"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.2.1",
+    "data-visor-vue": "workspace:*",
+    "shiki": "^4.0.2",
+    "vue": "^3.5.30"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.7",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "@wxt-dev/module-vue": "^1.0.3",
+    "happy-dom": "^20.8.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0",
+    "vue-tsc": "^3.2.6",
+    "wxt": "^0.20.20"
+  }
+}

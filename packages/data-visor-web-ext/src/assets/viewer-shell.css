@@ -1,0 +1,161 @@
+html[data-dv-ext="1"],
+html[data-dv-ext="1"] body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+}
+
+#dv-ext-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ext-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: #0f0f12;
+  color: #e8e8ed;
+}
+
+.ext-bar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  row-gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid color-mix(in srgb, #e8e8ed 18%, transparent);
+  background: #16161c;
+  font-size: 12px;
+}
+
+.ext-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ext-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid color-mix(in srgb, #e8e8ed 25%, transparent);
+  background: color-mix(in srgb, #e8e8ed 8%, transparent);
+  color: inherit;
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ext-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #e8e8ed 14%, transparent);
+}
+
+.ext-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ext-btn--on {
+  border-color: #6c9fff;
+  background: color-mix(in srgb, #6c9fff 22%, transparent);
+}
+
+.ext-shiki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+}
+
+.ext-shiki__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ext-shiki__lbl {
+  font-size: 10px;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.ext-select {
+  max-width: 9.5rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 11px;
+  line-height: 1.3;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, #e8e8ed 25%, transparent);
+  background: color-mix(in srgb, #e8e8ed 8%, transparent);
+  color: inherit;
+  cursor: pointer;
+}
+
+.ext-select:focus {
+  outline: 2px solid color-mix(in srgb, #6c9fff 55%, transparent);
+  outline-offset: 1px;
+}
+
+.ext-hint {
+  font-size: 10px;
+  opacity: 0.75;
+  max-width: 12rem;
+  text-align: right;
+}
+
+.ext-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ext-shell--light {
+  background: #f2f2f7;
+  color: #14141c;
+}
+
+.ext-shell--light .ext-bar {
+  background: #ffffff;
+  border-bottom-color: color-mix(in srgb, #14141c 12%, transparent);
+}
+
+.ext-shell--light .ext-btn {
+  border-color: color-mix(in srgb, #14141c 22%, transparent);
+  background: color-mix(in srgb, #14141c 6%, transparent);
+}
+
+.ext-shell--light .ext-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #14141c 11%, transparent);
+}
+
+.ext-shell--light .ext-btn--on {
+  border-color: #3d6bd8;
+  background: color-mix(in srgb, #3d6bd8 20%, transparent);
+}
+
+.ext-shell--light .ext-select {
+  border-color: color-mix(in srgb, #14141c 22%, transparent);
+  background: color-mix(in srgb, #14141c 6%, transparent);
+}
+
+.ext-shell--light .ext-select:focus {
+  outline-color: color-mix(in srgb, #3d6bd8 50%, transparent);
+}

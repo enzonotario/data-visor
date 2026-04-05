@@ -1,0 +1,38 @@
+name: Publish Any Commit
+
+on:
+  push:
+
+  pull_request:
+    types: [opened, synchronize]
+
+  pull_request_review:
+    types: [submitted]
+
+permissions: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish preview (data-visor-vue)
+        run: pnpm dlx pkg-pr-new publish --compact --pnpm ./packages/data-visor-vue
