@@ -22,3 +22,17 @@ export function wantsBrowserNativeView(href: string): boolean {
     return false
   }
 }
+
+function documentMime(doc: Pick<Document, 'contentType'>): string {
+  return (doc.contentType ?? '').split(';')[0].trim().toLowerCase()
+}
+
+export function shouldActivateForDocument(
+  href: string,
+  doc: Pick<Document, 'contentType'>,
+): boolean {
+  if (!shouldActivateForUrl(href)) return false
+  const mime = documentMime(doc)
+  if (mime === 'text/html') return false
+  return true
+}

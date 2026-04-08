@@ -8,7 +8,11 @@ import { extractPageText } from '@/lib/extract-text'
 import { VIEWER_MATCH_PATTERNS } from '@/lib/match-patterns'
 import { shikiDarkSyntaxTheme, shikiLightSyntaxTheme } from '@/lib/shiki-theme-storage'
 import { normalizeDarkSyntaxTheme, normalizeLightSyntaxTheme } from '@/lib/shiki-theme-utils'
-import { MAX_TREE_CHARS, shouldActivateForUrl, wantsBrowserNativeView } from '@/lib/should-activate'
+import {
+  MAX_TREE_CHARS,
+  shouldActivateForDocument,
+  wantsBrowserNativeView,
+} from '@/lib/should-activate'
 
 function takeoverDocument(): HTMLElement {
   const html = document.documentElement
@@ -37,7 +41,7 @@ export default defineContentScript({
   runAt: 'document_end',
   allFrames: false,
   async main() {
-    if (!shouldActivateForUrl(location.href)) return
+    if (!shouldActivateForDocument(location.href, document)) return
     if (wantsBrowserNativeView(location.href)) return
     const fullText = extractPageText(document)
     if (fullText.length > MAX_TREE_CHARS) return

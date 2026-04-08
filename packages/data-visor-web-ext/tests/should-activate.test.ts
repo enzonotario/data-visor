@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { shouldActivateForUrl, wantsBrowserNativeView } from '@/lib/should-activate'
+import {
+  shouldActivateForDocument,
+  shouldActivateForUrl,
+  wantsBrowserNativeView,
+} from '@/lib/should-activate'
 
 describe('shouldActivateForUrl', () => {
   it('accepts json path', () => {
@@ -22,6 +26,32 @@ describe('shouldActivateForUrl', () => {
 
   it('handles query on filename', () => {
     expect(shouldActivateForUrl('https://ex.com/x.json?token=1')).toBe(true)
+  })
+})
+
+describe('shouldActivateForDocument', () => {
+  const doc = (contentType: string): Pick<Document, 'contentType'> => ({ contentType })
+
+  it('allows raw json/yaml mime types', () => {
+    expect(shouldActivateForDocument('https://ex.com/a.json', doc('application/json'))).toBe(true)
+    expect(shouldActivateForDocument('https://ex.com/a.yml', doc('text/plain'))).toBe(true)
+    expect(
+      shouldActivateForDocument('https://ex.com/a.yaml', doc('text/yaml; charset=utf-8')),
+    ).toBe(true)
+  })
+
+  it('rejects GitHub-style HTML shell despite .yml in path', () => {
+    const href = 'https://github.com/enzonotario/esjs-argentina-datos/actions/workflows/senado.yml'
+    expect(shouldActivateForDocument(href, doc('text/html'))).toBe(false)
+    expect(shouldActivateForDocument(href, doc('text/html; charset=utf-8'))).toBe(false)
+  })
+
+  it('allows empty contentType (e.g. file://) when URL matches', () => {
+    expect(shouldActivateForDocument('file:///tmp/x.json', doc(''))).toBe(true)
+  })
+
+  it('rejects non-matching URLs regardless of mime', () => {
+    expect(shouldActivateForDocument('https://ex.com/page.html', doc('text/plain'))).toBe(false)
   })
 })
 

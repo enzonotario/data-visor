@@ -10,8 +10,14 @@ export default defineConfig({
     ['meta', { property: 'og:image', content: 'https://data-visor.enzonotario.me/og.png' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:image', content: 'https://data-visor.enzonotario.me/og.png' }],
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: 'https://data-visor.enzonotario.me//icon.svg' }],
-    ['link', { rel: 'icon', type: 'image/png', href: 'https://data-visor.enzonotario.me//icon.png' }],
+    [
+      'link',
+      { rel: 'icon', type: 'image/svg+xml', href: 'https://data-visor.enzonotario.me//icon.svg' },
+    ],
+    [
+      'link',
+      { rel: 'icon', type: 'image/png', href: 'https://data-visor.enzonotario.me//icon.png' },
+    ],
   ],
   themeConfig: {
     nav: [
