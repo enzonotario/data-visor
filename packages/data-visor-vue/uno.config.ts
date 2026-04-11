@@ -4,6 +4,10 @@ export default defineConfig({
   content: {
     filesystem: ['./src/**/*.{vue,ts,tsx}'],
   },
-  presets: [presetUno()],
+  presets: [
+    presetUno({
+      preflight: false,
+    }),
+  ],
   transformers: [transformerDirectives()],
 })

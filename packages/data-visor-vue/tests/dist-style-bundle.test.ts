@@ -11,5 +11,6 @@ describe('dist/style.css', () => {
     }
     const css = readFileSync(distCss, 'utf8')
     expect(css).not.toMatch(/@apply\b/)
+    expect(css).not.toMatch(/\*,\s*::before/)
   })
 })
