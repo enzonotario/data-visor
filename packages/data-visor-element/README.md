@@ -47,6 +47,10 @@ registerDataVisor({ tagName: 'my-json-viewer' })
 
 The element uses **light DOM** (`shadowRoot: false`) so `data-visor-vue/style.css` applies normally. If you need Shadow DOM, open an issue — it would require bundling styles into the shadow root.
 
+### Host apps (Nuxt, Tailwind, etc.)
+
+From **data-visor-vue ≥ 0.0.4**, the distributed `style.css` is built **without UnoCSS preflights** (no global `*` / `::before` / `::after` resets). That keeps the viewer utilities without overriding your app’s layout. Older builds could still affect unrelated routes if imported globally; prefer loading the stylesheet only on routes that render the viewer.
+
 ## API
 
 - `registerDataVisor(options?)` — registers `<data-visor>` or `options.tagName`.

@@ -1,7 +1,7 @@
 {
   "name": "data-visor-vue",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Data Visor — JSON/YAML/XML viewer for Vue 3, powered by Shiki",
   "license": "MIT",
   "repository": {

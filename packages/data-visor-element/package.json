@@ -1,7 +1,7 @@
 {
   "name": "data-visor-element",
   "type": "module",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Data Visor as a native Web Component (Custom Element), built on data-visor-vue",
   "license": "MIT",
   "repository": {
@@ -34,7 +34,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "peerDependencies": {
-    "data-visor-vue": "^0.0.3",
+    "data-visor-vue": "^0.0.4",
     "vue": "^3.5.0"
   },
   "devDependencies": {
