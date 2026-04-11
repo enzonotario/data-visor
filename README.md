@@ -6,6 +6,8 @@ JSON/YAML/XML Viewer for Vue 3, powered by Shiki.
 
 To get started, check out the [documentation](https://data-visor.enzonotario.me/).
 
+The browser extension is available on the [Chrome Web Store](https://chromewebstore.google.com/detail/data-visor/eaaffhkhgmalbjinflnnkmgjcidmkmpc).
+
 ## License
 
 [MIT License](./LICENSE) © 2026-present [Enzo Notario](https://github.com/enzonotario).
