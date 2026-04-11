@@ -1,0 +1,50 @@
+{
+  "name": "data-visor-element",
+  "type": "module",
+  "version": "0.0.1-alpha.1",
+  "description": "Data Visor as a native Web Component (Custom Element), built on data-visor-vue",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enzonotario/data-visor.git",
+    "directory": "packages/data-visor-element"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/data-visor-element.js",
+      "require": "./dist/data-visor-element.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/data-visor-element.cjs",
+  "module": "./dist/data-visor-element.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "pnpm --filter data-visor-vue run build",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "data-visor-vue": "^0.0.3",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "data-visor-vue": "workspace:*",
+    "happy-dom": "^20.8.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.1.0",
+    "vue": "^3.5.30",
+    "vue-tsc": "^3.2.6"
+  }
+}
