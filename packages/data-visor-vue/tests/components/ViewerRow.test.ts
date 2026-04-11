@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { ViewerContext } from '../../src/components/DataVisor/injectionKey'
 import { VIEWER_KEY } from '../../src/components/DataVisor/injectionKey'
 import NodeToolbar from '../../src/components/DataVisor/NodeToolbar.vue'
@@ -36,6 +36,7 @@ function makeCtx(overrides: Partial<ViewerContext> = {}): ViewerContext {
     tokenMap: ref(new Map()),
     copiedNodePath: ref(null),
     lang: ref('json'),
+    isTreeDisplayMode: computed(() => true),
     ...overrides,
   }
 }

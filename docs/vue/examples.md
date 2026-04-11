@@ -12,7 +12,7 @@ Explore some practical examples using `DataVisor` with different formats and con
 
 The `data` prop is mandatory and must be a string. Set `lang` to `'json'`, `'yaml'`, or `'xml'` so DataVisor parses and highlights the document correctly (`json` is the default).
 
-The live demos below use the same sample dataset in three formats (see `$examples` in the docs theme). For static minified strings used in tests or demos, see `$examples.ALL_MINIFIED` (or `JSON_MINIFIED`, `YAML_MINIFIED`, `XML_MINIFIED`). For an interactive **minified source** view, use the **Tree \| Minified** control in the toolbar, or `v-model:display-mode` from a parent. Without `v-model`, the toolbar still toggles the view internally (see [playground](/playground.html)).
+The live demos below use the same sample dataset in three formats (see `$examples` in the docs theme). For static minified strings used in tests or demos, see `$examples.ALL_MINIFIED` (or `JSON_MINIFIED`, `YAML_MINIFIED`, `XML_MINIFIED`). For **minified** or **fractured** JSON source views, use the toolbar (**Tree \| Minified \| Fractured** for JSON), or `v-model:display-mode` from a parent. Fractured mode uses [FracturedJson](https://github.com/j-brooke/FracturedJsonJs) formatting. Without `v-model`, the toolbar still toggles the view internally (see [playground](/playground.html)).
 
 ```vue
 <script setup>

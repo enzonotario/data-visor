@@ -16,10 +16,18 @@ import type {
   DataVisorProps,
   ShikiTheme,
   TreeNode,
+  TreeValue,
   ViewerDisplayMode,
 } from '../../types/tree'
+import { buildFracturedRegions } from '../../utils/fracturedRegions'
+import {
+  getFracturedFormatter,
+  serializeFractured,
+  serializeFracturedValue,
+} from '../../utils/serializeFractured'
 import { serializeMinified } from '../../utils/serializeMinified'
 import Breadcrumb from './Breadcrumb.vue'
+import FracturedSource from './FracturedSource.vue'
 import { VIEWER_KEY } from './injectionKey'
 import SearchBar from './SearchBar.vue'
 import Toolbar from './Toolbar.vue'
@@ -73,7 +81,8 @@ const displayMode = defineModel<ViewerDisplayMode>('displayMode', { default: 'tr
 
 const emit = defineEmits<DataVisorEmit>()
 
-const isMinifiedMode = computed(() => displayMode.value === 'minified')
+const isTreeViewMode = computed(() => displayMode.value === 'tree')
+const isFracturedMode = computed(() => displayMode.value === 'fractured')
 
 function setDisplayModeFromToolbar(mode: ViewerDisplayMode) {
   displayMode.value = mode
@@ -116,8 +125,15 @@ watch(nodes, () => {
 
 const vScroll = useVirtualScroll(expansion.visibleNodes)
 
+const jsonSerializeForCopy = computed(() => {
+  if (displayMode.value === 'fractured' && props.lang === 'json') {
+    return (v: TreeValue) => serializeFracturedValue(v)
+  }
+  return (v: TreeValue) => JSON.stringify(v, null, 2)
+})
+
 const { copy } = useClipboard()
-const { copiedNodePath, copyNode } = useCopyNode(langRef, copy)
+const { copiedNodePath, copyNode } = useCopyNode(langRef, copy, jsonSerializeForCopy)
 
 const viewerRef = ref<HTMLElement | null>(null)
 const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null)
@@ -127,9 +143,18 @@ const overlay = useSearchOverlay(search, expansion, vScroll, nodes, viewerRef, (
   searchBarRef.value?.focus(),
 )
 
-watch(isMinifiedMode, (m) => {
-  if (m) overlay.closeSearch()
+watch(isTreeViewMode, (tree) => {
+  if (!tree) overlay.closeSearch()
 })
+
+watch(
+  () => props.lang,
+  (lang) => {
+    if (lang !== 'json' && displayMode.value === 'fractured') {
+      displayMode.value = 'tree'
+    }
+  },
+)
 
 const searchBarBind = computed(() => ({
   query: search.query.value,
@@ -147,6 +172,8 @@ const floatingSearchStyle = computed(() => {
 
 const selectedLevel = ref(1)
 
+const isTreeDisplayMode = computed(() => displayMode.value === 'tree')
+
 provide(VIEWER_KEY, {
   expansion: {
     isExpanded: expansion.isExpanded,
@@ -158,6 +185,7 @@ provide(VIEWER_KEY, {
   },
   tokenMap,
   lang: langRef,
+  isTreeDisplayMode,
   expandSubtree: expansion.expandSubtree,
   collapseSubtree: expansion.collapseSubtree,
   expandSubtreeToDepth: expansion.expandSubtreeToDepth,
@@ -171,20 +199,32 @@ provide(VIEWER_KEY, {
 })
 
 function copyContent() {
-  const payload =
-    isMinifiedMode.value && !parseError.value
-      ? (serializeMinified(props.data, props.lang) ?? props.data)
-      : props.data
+  let payload = props.data
+  if (!parseError.value) {
+    if (displayMode.value === 'minified') {
+      payload = serializeMinified(props.data, props.lang) ?? props.data
+    } else if (displayMode.value === 'fractured' && props.lang === 'json') {
+      payload = serializeFractured(props.data) ?? props.data
+    }
+  }
   copy(payload)
   emit('copy', payload)
 }
 
 const minifiedHtmlBlock = ref('')
+const fracturedHtmlBlock = ref('')
+
+const fracturedRegions = computed(() => {
+  if (displayMode.value !== 'fractured' || props.lang !== 'json' || parseError.value) return []
+  const text = serializeFractured(props.data)
+  if (!text) return []
+  return buildFracturedRegions(text, nodes.value, getFracturedFormatter())
+})
 
 watch(
   [() => props.data, () => props.lang, () => displayMode.value, currentTheme, parseError],
   async () => {
-    if (!isMinifiedMode.value || parseError.value) {
+    if (displayMode.value !== 'minified' || parseError.value) {
       minifiedHtmlBlock.value = ''
       return
     }
@@ -204,6 +244,32 @@ watch(
   { immediate: true },
 )
 
+watch(
+  [() => props.data, () => props.lang, () => displayMode.value, currentTheme, parseError],
+  async () => {
+    if (displayMode.value !== 'fractured' || parseError.value) {
+      fracturedHtmlBlock.value = ''
+      return
+    }
+    if (props.lang !== 'json') {
+      fracturedHtmlBlock.value = ''
+      return
+    }
+    const text = serializeFractured(props.data)
+    if (!text) {
+      fracturedHtmlBlock.value = ''
+      return
+    }
+    try {
+      await shiki.load(currentTheme.value, props.lang, shikiPreloadThemes.value)
+      fracturedHtmlBlock.value = shiki.highlight(text, currentTheme.value, props.lang)
+    } catch {
+      fracturedHtmlBlock.value = ''
+    }
+  },
+  { immediate: true },
+)
+
 function onBreadcrumbSegmentClick(path: string) {
   expansion.expandPath(path, nodes.value)
   expansion.toggle(path)
@@ -216,7 +282,7 @@ function onSearchQueryUpdate(value: string) {
 }
 
 useEventListener(document, 'keydown', (e: KeyboardEvent) => {
-  if (displayMode.value === 'minified') {
+  if (displayMode.value !== 'tree') {
     return
   }
   if (e.key === 'Escape' && overlay.searchOpen.value) {
@@ -256,7 +322,7 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 
 const chord = useChordShortcut()
 chord.register({ ctrl: true, shift: true, key: '*' }, ([key]) => {
-  if (displayMode.value === 'minified') return
+  if (displayMode.value !== 'tree') return
   const n = Number(key)
   if (!Number.isNaN(n)) {
     if (n === 0) expansion.collapseAll()
@@ -276,7 +342,7 @@ const hasViewerMinHeight = computed(
 )
 
 const usesClampedOuterHeight = computed(() => {
-  if (isMinifiedMode.value) return false
+  if (displayMode.value !== 'tree') return false
   if (parseError.value) return false
   if (usesIntrinsicListHeight.value) return false
   if (!hasViewerMinHeight.value) return false
@@ -320,7 +386,7 @@ const innerStyle = computed(() => {
     '--dv-bg': themeBg.value,
     '--dv-fg': themeFg.value,
   }
-  if (usesIntrinsicListHeight.value && !isMinifiedMode.value) {
+  if (usesIntrinsicListHeight.value && isTreeViewMode.value) {
     s['--dv-list-min-height'] = `${vScroll.totalHeight.value}px`
   }
   return s
@@ -347,7 +413,8 @@ const innerStyle = computed(() => {
         v-if="props.showToolbar"
         :is-awaiting-chord="chord.isAwaitingSequence.value"
         :display-mode="displayMode"
-        :tree-actions-disabled="isMinifiedMode"
+        :lang="props.lang"
+        :tree-actions-disabled="!isTreeViewMode"
         @update:display-mode="setDisplayModeFromToolbar"
         @expand-all="expansion.expandAll()"
         @collapse-all="expansion.collapseAll()"
@@ -357,7 +424,7 @@ const innerStyle = computed(() => {
       />
 
       <SearchBar
-        v-if="!isMinifiedMode && overlay.searchOpen.value && !overlay.searchAnchorPos.value"
+        v-if="isTreeViewMode && overlay.searchOpen.value && !overlay.searchAnchorPos.value"
         ref="searchBarRef"
         v-bind="searchBarBind"
         @update:query="onSearchQueryUpdate"
@@ -367,7 +434,7 @@ const innerStyle = computed(() => {
       />
 
       <div
-        v-if="!isMinifiedMode && overlay.searchOpen.value && overlay.searchAnchorPos.value"
+        v-if="isTreeViewMode && overlay.searchOpen.value && overlay.searchAnchorPos.value"
         class="dv-floating-search"
         :style="floatingSearchStyle"
       >
@@ -386,13 +453,21 @@ const innerStyle = computed(() => {
       </div>
 
       <div
-        v-else-if="isMinifiedMode"
+        v-else-if="displayMode === 'minified'"
         class="dv-source-minified"
         tabindex="0"
         role="region"
         aria-label="Minified source"
       >
         <div class="dv-source-minified__inner" v-html="minifiedHtmlBlock" />
+      </div>
+
+      <div v-else-if="isFracturedMode" class="dv-viewer__fractured-shell">
+        <FracturedSource
+          :html="fracturedHtmlBlock"
+          :regions="fracturedRegions"
+          @hover-node="hoveredNode = $event"
+        />
       </div>
 
       <VirtualList
@@ -408,7 +483,7 @@ const innerStyle = computed(() => {
       />
 
       <Breadcrumb
-        v-if="props.showBreadcrumb && !isMinifiedMode"
+        v-if="props.showBreadcrumb && displayMode !== 'minified'"
         :node="hoveredNode"
         @segment-click="onBreadcrumbSegmentClick"
       />
@@ -430,6 +505,7 @@ const innerStyle = computed(() => {
   @apply flex flex-col overflow-hidden relative border border-solid rounded-md;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   font-size: 13px;
   border-color: color-mix(in srgb, var(--dv-fg, #cdd6f4) 20%, transparent);
   background: var(--dv-bg, #1e1e2e);
@@ -454,6 +530,23 @@ const innerStyle = computed(() => {
 }
 
 .dv-viewer--intrinsic .dv-source-minified {
+  flex: 1 0 auto;
+}
+
+/** Traps wide fractured lines: blocks min-content from stretching outer flex ancestors. */
+.dv-viewer__fractured-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.dv-viewer--intrinsic .dv-viewer__fractured-shell {
   flex: 1 0 auto;
 }
 
@@ -757,6 +850,11 @@ const innerStyle = computed(() => {
   background: color-mix(in srgb, var(--dv-fg, #cdd6f4) 12%, transparent);
   border-color: color-mix(in srgb, var(--dv-fg, #cdd6f4) 25%, transparent);
   color: var(--dv-fg, #cdd6f4);
+}
+
+:deep(.dv-node-toolbar__btn:disabled) {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 :deep(.dv-node-toolbar__level) {

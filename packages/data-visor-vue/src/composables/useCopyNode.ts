@@ -1,5 +1,5 @@
 import { XMLBuilder } from 'fast-xml-parser'
-import { type Ref, ref } from 'vue'
+import { type ComputedRef, type Ref, ref } from 'vue'
 import { stringify as yamlStringify } from 'yaml'
 import type { TreeValue, ViewerLang } from '../types/tree'
 import { pathToSegments } from '../utils/path'
@@ -21,6 +21,7 @@ export interface UseCopyNodeReturn {
 export function useCopyNode(
   lang: Ref<ViewerLang>,
   copy: (text: string) => Promise<void>,
+  jsonSerialize: ComputedRef<(value: TreeValue) => string>,
 ): UseCopyNodeReturn {
   const copiedNodePath = ref<string | null>(null)
 
@@ -41,7 +42,7 @@ export function useCopyNode(
     let serialized: string
     if (lang.value === 'yaml') serialized = yamlStringify(value)
     else if (lang.value === 'xml') serialized = serializeXml(value, nodePath)
-    else serialized = JSON.stringify(value, null, 2)
+    else serialized = jsonSerialize.value(value)
     copy(serialized)
     copiedNodePath.value = nodePath
     setTimeout(() => {

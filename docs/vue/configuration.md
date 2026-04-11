@@ -10,7 +10,7 @@ The `DataVisor` component accepts several props for customization.
 | :--- | :--- | :--- | :--- |
 | `data` | `string` | - | Serialized document text (JSON, YAML, or XML) to display. |
 | `lang` | `'json' \| 'yaml' \| 'xml'` | `'json'` | Format of the `data` string. |
-| `v-model:display-mode` | `'tree' \| 'minified'` | `'tree'` | Optional two-way binding. `tree` shows the expandable tree; `minified` shows the whole document as compact highlighted source. The toolbar includes **Tree \| Minified**; without `v-model`, the mode is kept inside the component (e.g. docs examples). In `minified`, expand/collapse, depth, and search stay visible but disabled. |
+| `v-model:display-mode` | `'tree' \| 'minified' \| 'fractured'` | `'tree'` | Optional two-way binding. `tree` shows the expandable tree; `minified` shows the whole document as compact highlighted source; `fractured` (JSON only) shows [FracturedJson](https://github.com/j-brooke/FracturedJsonJs)-formatted text with Shiki highlighting. The toolbar includes **Tree \| Minified** and **Fractured** when `lang` is `json`. Without `v-model`, the mode is kept inside the component (e.g. docs examples). In `minified` and `fractured`, the main expand/collapse, depth, and search controls are **disabled**. In `fractured`, move the mouse over the source: the **breadcrumb** shows the path for the line under the cursor. Per-node copy/expand actions are only available in **tree** view (not in fractured). **Search within** stays disabled in `fractured` (no tree rows). |
 | `darkTheme` | `ShikiTheme` | `'github-dark'` | Shiki theme for dark mode. |
 | `lightTheme` | `ShikiTheme` | `'github-light'` | Shiki theme for light mode. |
 | `isDark` | `boolean` | `false` | Whether to use the dark theme. |

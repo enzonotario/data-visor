@@ -21,7 +21,7 @@ export interface TreeNode {
 
 export type ViewerLang = 'json' | 'yaml' | 'xml'
 
-export type ViewerDisplayMode = 'tree' | 'minified'
+export type ViewerDisplayMode = 'tree' | 'minified' | 'fractured'
 
 export interface DataVisorProps {
   data: string

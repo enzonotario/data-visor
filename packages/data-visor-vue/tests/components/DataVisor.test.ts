@@ -9,6 +9,7 @@ async function flushDom() {
 
 import Breadcrumb from '../../src/components/DataVisor/Breadcrumb.vue'
 import DataVisor from '../../src/components/DataVisor/DataVisor.vue'
+import FracturedSource from '../../src/components/DataVisor/FracturedSource.vue'
 import SearchBar from '../../src/components/DataVisor/SearchBar.vue'
 import Toolbar from '../../src/components/DataVisor/Toolbar.vue'
 import VirtualList from '../../src/components/DataVisor/VirtualList.vue'
@@ -26,6 +27,7 @@ function mountViewer(
         SearchBar,
         VirtualList,
         Breadcrumb,
+        FracturedSource,
       },
     },
     attachTo: document.body,
@@ -153,6 +155,19 @@ describe('DataVisor — JSON', () => {
     wrapper.unmount()
   })
 
+  it('shows fractured Shiki source when displayMode is fractured (JSON)', async () => {
+    const wrapper = mountViewer({ a: 1, b: [2, 3] }, { displayMode: 'fractured' })
+    await flushDom()
+    await flushDom()
+    expect(wrapper.find('.dv-source-fractured').exists()).toBe(true)
+    expect(wrapper.find('.dv-source-fractured__gutter').exists()).toBe(false)
+    expect(wrapper.find('.dv-virtual-list').exists()).toBe(false)
+    const searchBtn = wrapper.find('button[title="Search (CTRL+F)"]')
+    expect((searchBtn.element as HTMLButtonElement).disabled).toBe(true)
+    expect(wrapper.find('.dv-source-fractured__float').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('applies custom maxHeight and minHeight on the wrap (DOM style)', async () => {
     const wrapper = mountViewer({ name: 'Alice' }, { maxHeight: 'none', minHeight: '100px' })
     await nextTick()
@@ -185,7 +200,7 @@ describe('DataVisor — JSON', () => {
     const wrapper = mount(DataVisor, {
       props: { data: '{}', 'min-height': '300px' },
       global: {
-        components: { Toolbar, SearchBar, VirtualList, Breadcrumb },
+        components: { Toolbar, SearchBar, VirtualList, Breadcrumb, FracturedSource },
       },
       attachTo: document.body,
     })

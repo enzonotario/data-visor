@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ViewerDisplayMode } from '../../types/tree'
+import type { ViewerDisplayMode, ViewerLang } from '../../types/tree'
 import LevelPicker from './LevelPicker.vue'
 
 const props = defineProps<{
   isAwaitingChord: boolean
   displayMode: ViewerDisplayMode
-  /** When true, expand / collapse / depth / search are inactive (minified view). */
+  lang: ViewerLang
+  /** When true, expand / collapse / depth / search are inactive (minified / fractured view). */
   treeActionsDisabled: boolean
 }>()
 
@@ -98,6 +99,18 @@ function setDisplayMode(mode: ViewerDisplayMode) {
       >
         Tree
       </button>
+      <button
+        v-if="props.lang === 'json'"
+        type="button"
+        class="dv-toolbar__segment-btn"
+        role="radio"
+        :aria-checked="props.displayMode === 'fractured'"
+        :class="{ 'dv-toolbar__segment-btn--on': props.displayMode === 'fractured' }"
+        @click="setDisplayMode('fractured')"
+      >
+        Fractured
+      </button>
+
       <button
         type="button"
         class="dv-toolbar__segment-btn"

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import type { TreeNode } from '../../types/tree'
 import { VIEWER_KEY } from './injectionKey'
 import LevelPicker from './LevelPicker.vue'
 
 const props = defineProps<{ node: TreeNode }>()
 const ctx = inject(VIEWER_KEY)!
+
+const subtreeSearchEnabled = computed(() => ctx.isTreeDisplayMode?.value ?? true)
 
 const copied = ref(false)
 const tooltipStyle = ref<{ left: string; top: string } | null>(null)
@@ -50,6 +52,7 @@ function handleCopy(e: MouseEvent) {
     <button
       class="dv-node-toolbar__btn"
       title="Search within"
+      :disabled="!subtreeSearchEnabled"
       @click="ctx.openSearchWithScope(props.node.path, $event.currentTarget as HTMLElement)"
     >
       <span class="dv-ico dv-ico--magnify" aria-hidden="true" />
