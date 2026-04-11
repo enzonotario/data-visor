@@ -8,6 +8,8 @@ export interface UseTreeReturn {
   nodes: ComputedRef<TreeNode[]>
   nodeMap: ComputedRef<Map<string, TreeNode>>
   parseError: Ref<string | null>
+  /** Parsed document when `parseError` is null (for tree copy, etc.). */
+  parsed: ComputedRef<TreeValue | null>
 }
 
 export function useTree(source: Ref<string>, lang: Ref<ViewerLang>): UseTreeReturn {
@@ -39,5 +41,5 @@ export function useTree(source: Ref<string>, lang: Ref<ViewerLang>): UseTreeRetu
     return map
   })
 
-  return { nodes, nodeMap, parseError }
+  return { nodes, nodeMap, parseError, parsed }
 }

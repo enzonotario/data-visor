@@ -19,6 +19,7 @@ import type {
   TreeValue,
   ViewerDisplayMode,
 } from '../../types/tree'
+import { serializeDocumentForTreeView } from '../../utils/documentSerialize'
 import { buildFracturedRegions } from '../../utils/fracturedRegions'
 import {
   getFracturedFormatter,
@@ -90,7 +91,7 @@ function setDisplayModeFromToolbar(mode: ViewerDisplayMode) {
 
 const dataRef = computed(() => props.data)
 const langRef = computed(() => props.lang)
-const { nodes, parseError } = useTree(dataRef, langRef)
+const { nodes, parseError, parsed } = useTree(dataRef, langRef)
 const expansion = useExpansion(nodes)
 const search = useSearch(nodes)
 const shiki = useShiki()
@@ -201,7 +202,9 @@ provide(VIEWER_KEY, {
 function copyContent() {
   let payload = props.data
   if (!parseError.value) {
-    if (displayMode.value === 'minified') {
+    if (displayMode.value === 'tree' && parsed.value !== null) {
+      payload = serializeDocumentForTreeView(props.lang, parsed.value)
+    } else if (displayMode.value === 'minified') {
       payload = serializeMinified(props.data, props.lang) ?? props.data
     } else if (displayMode.value === 'fractured' && props.lang === 'json') {
       payload = serializeFractured(props.data) ?? props.data

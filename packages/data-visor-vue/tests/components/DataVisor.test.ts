@@ -131,6 +131,18 @@ describe('DataVisor — JSON', () => {
     expect(wrapper.emitted('copy')).toBeTruthy()
   })
 
+  it('copies pretty-printed JSON from toolbar in tree mode when input is minified', async () => {
+    const minified = JSON.stringify({ a: 1, b: 2 })
+    const wrapper = mountViewer(minified)
+    await flushDom()
+    await wrapper.find('button[title*="Copy"]').trigger('click')
+    const emitted = wrapper.emitted('copy')
+    expect(emitted).toBeTruthy()
+    const payload = emitted![0][0] as string
+    expect(payload).toContain('\n')
+    expect(JSON.parse(payload)).toEqual({ a: 1, b: 2 })
+  })
+
   it('emits node-click when a row is clicked', async () => {
     const wrapper = mountViewer()
     const row = wrapper.find('.dv-row')
