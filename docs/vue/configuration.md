@@ -10,6 +10,7 @@ The `DataVisor` component accepts several props for customization.
 | :--- | :--- | :--- | :--- |
 | `data` | `string` | - | Serialized document text (JSON, YAML, or XML) to display. |
 | `lang` | `'json' \| 'yaml' \| 'xml'` | `'json'` | Format of the `data` string. |
+| `v-model:display-mode` | `'tree' \| 'minified'` | `'tree'` | Optional two-way binding. `tree` shows the expandable tree; `minified` shows the whole document as compact highlighted source. The toolbar includes **Tree \| Minified**; without `v-model`, the mode is kept inside the component (e.g. docs examples). In `minified`, expand/collapse, depth, and search stay visible but disabled. |
 | `darkTheme` | `ShikiTheme` | `'github-dark'` | Shiki theme for dark mode. |
 | `lightTheme` | `ShikiTheme` | `'github-light'` | Shiki theme for light mode. |
 | `isDark` | `boolean` | `false` | Whether to use the dark theme. |

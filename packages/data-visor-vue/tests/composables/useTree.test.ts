@@ -60,6 +60,14 @@ describe('useTree — YAML', () => {
     expect(nodes.value.length).toBeGreaterThan(0)
   })
 
+  it('parses minified one-line YAML (JSON syntax is valid YAML 1.2)', () => {
+    const content = ref('{"a":1,"b":[2,3]}')
+    const lang = ref<'yaml'>('yaml')
+    const { nodes, parseError } = useTree(content, lang)
+    expect(parseError.value).toBeNull()
+    expect(nodes.value.length).toBeGreaterThan(0)
+  })
+
   it('exposes parseError on invalid YAML', () => {
     const content = ref('key: [unclosed')
     const lang = ref<'yaml'>('yaml')
@@ -72,6 +80,14 @@ describe('useTree — YAML', () => {
 describe('useTree — XML', () => {
   it('parses valid XML', () => {
     const content = ref('<root><name>Alice</name></root>')
+    const lang = ref<'xml'>('xml')
+    const { nodes, parseError } = useTree(content, lang)
+    expect(parseError.value).toBeNull()
+    expect(nodes.value.length).toBeGreaterThan(0)
+  })
+
+  it('parses minified XML on one line', () => {
+    const content = ref('<?xml version="1.0" encoding="UTF-8"?><root><name>Alice</name></root>')
     const lang = ref<'xml'>('xml')
     const { nodes, parseError } = useTree(content, lang)
     expect(parseError.value).toBeNull()

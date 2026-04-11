@@ -83,7 +83,11 @@ function rawValue(node: TreeNode): string {
       'dv-node-value--active-match': props.isActiveMatch,
     }"
   >
-    <span v-if="props.highlightedHtml" class="dv-node-value__shiki" v-html="props.highlightedHtml" />
+    <span
+      v-if="props.highlightedHtml && isJson"
+      class="dv-node-value__shiki"
+      v-html="props.highlightedHtml"
+    />
 
     <template v-else-if="nodeContext === 'closing'">
       <span v-if="isJson" class="dv-node-value__bracket">{{ closingBracket(props.node) }}</span>

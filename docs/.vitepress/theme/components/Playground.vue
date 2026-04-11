@@ -7,6 +7,7 @@ import PlaygroundViewer from './PlaygroundViewer.vue'
 
 const {
   lang,
+  viewerMode,
   showLineNumbers,
   showToolbar,
   showBreadcrumb,
@@ -39,12 +40,10 @@ const isDark = useDark({
       />
 
       <div class="flex flex-1 overflow-hidden p-3 gap-3">
-        <PlaygroundInput
-          v-model="currentContent"
-          :lang="lang"
-        />
+        <PlaygroundInput v-model="currentContent" :lang="lang" />
 
         <PlaygroundViewer
+          v-model:viewer-mode="viewerMode"
           :data="currentContent"
           :lang="lang"
           :dark-theme="darkTheme"

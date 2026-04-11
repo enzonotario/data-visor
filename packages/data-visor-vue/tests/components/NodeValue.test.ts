@@ -110,6 +110,22 @@ describe('NodeValue — JSON', () => {
     expect(wrapper.find('.dv-node-value__shiki').html()).toContain('color:green')
   })
 
+  it('does not render Shiki HTML when lang is not JSON (highlight tokens are JSON-shaped)', () => {
+    const node = makeNode()
+    const wrapper = mount(NodeValue, {
+      props: {
+        node,
+        highlightedHtml: '<span style="color:green">"Alice"</span>',
+        isMatch: false,
+        isActiveMatch: false,
+        isExpanded: false,
+      },
+      global: { plugins: [{ install: (app) => app.provide(VIEWER_KEY, makeCtx('yaml')) }] },
+    })
+    expect(wrapper.find('.dv-node-value__shiki').exists()).toBe(false)
+    expect(wrapper.find('.dv-node-value__raw').text()).toBe('Alice')
+  })
+
   it('renders closing bracket for closing node', () => {
     const node = makeNode({
       id: '$/$close',

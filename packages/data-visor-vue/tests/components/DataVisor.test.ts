@@ -141,6 +141,18 @@ describe('DataVisor — JSON', () => {
     expect(wrapper.find('.dv-virtual-list').exists()).toBe(true)
   })
 
+  it('shows minified Shiki source when displayMode is minified', async () => {
+    const wrapper = mountViewer({ a: 1 }, { displayMode: 'minified' })
+    await flushDom()
+    await flushDom()
+    expect(wrapper.find('.dv-source-minified').exists()).toBe(true)
+    expect(wrapper.find('.dv-virtual-list').exists()).toBe(false)
+    const searchBtn = wrapper.find('button[title="Search (CTRL+F)"]')
+    expect(searchBtn.exists()).toBe(true)
+    expect((searchBtn.element as HTMLButtonElement).disabled).toBe(true)
+    wrapper.unmount()
+  })
+
   it('applies custom maxHeight and minHeight on the wrap (DOM style)', async () => {
     const wrapper = mountViewer({ name: 'Alice' }, { maxHeight: 'none', minHeight: '100px' })
     await nextTick()

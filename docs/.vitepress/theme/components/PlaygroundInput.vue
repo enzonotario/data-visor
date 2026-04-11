@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ViewerLang } from 'data-visor-vue'
 
-const props = defineProps<{
+defineProps<{
   lang: ViewerLang
 }>()
 

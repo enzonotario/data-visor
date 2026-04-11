@@ -11,6 +11,7 @@ const props = defineProps<{
   modelValue?: number
   min?: number
   max?: number
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -37,16 +38,29 @@ function set(n: number) {
   emit('update:modelValue', next)
 }
 
-function step(delta: number) { set(current.value + delta) }
+function step(delta: number) {
+  if (props.disabled) return
+  set(current.value + delta)
+}
+
+function onTrackClick() {
+  if (props.disabled) return
+  emit('select', current.value)
+}
 
 function onWheel(e: WheelEvent) {
+  if (props.disabled) return
   e.preventDefault()
   step(e.deltaY > 0 ? -1 : 1)
 }
 
 let lastTouchX = 0
-function onTouchStart(e: TouchEvent) { lastTouchX = e.touches[0].clientX }
+function onTouchStart(e: TouchEvent) {
+  if (props.disabled) return
+  lastTouchX = e.touches[0].clientX
+}
 function onTouchMove(e: TouchEvent) {
+  if (props.disabled) return
   e.preventDefault()
   const dx = lastTouchX - e.touches[0].clientX
   if (Math.abs(dx) > 10) {
@@ -56,6 +70,7 @@ function onTouchMove(e: TouchEvent) {
 }
 
 function onKeyDown(e: KeyboardEvent) {
+  if (props.disabled) return
   if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); step(1) }
   if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); step(-1) }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); emit('select', current.value) }
@@ -67,25 +82,26 @@ function onKeyDown(e: KeyboardEvent) {
 <template>
   <div
     class="lp"
-    tabindex="0"
-    :title="`Level ${current} — click to expand, scroll/drag to change`"
+    :class="{ 'lp--disabled': props.disabled }"
+    :tabindex="props.disabled ? -1 : 0"
+    :title="props.disabled ? 'N/A in minified view' : `Level ${current} — click to expand, scroll/drag to change`"
     @wheel="onWheel"
     @touchstart.passive="onTouchStart"
     @touchmove="onTouchMove"
     @keydown="onKeyDown"
     @click.stop
   >
-    <button class="lp__arrow lp__arrow--left" tabindex="-1" @click.stop="step(-1)">
+    <button class="lp__arrow lp__arrow--left" tabindex="-1" type="button" @click.stop="step(-1)">
       <span class="dv-ico dv-ico--chevron-left" aria-hidden="true" />
     </button>
 
-    <div class="lp__track" @click.stop="emit('select', current)">
+    <div class="lp__track" @click.stop="onTrackClick">
       <Transition :name="`lp-${slideDir}`">
         <span :key="current" class="lp__num">{{ current }}</span>
       </Transition>
     </div>
 
-    <button class="lp__arrow lp__arrow--right" tabindex="-1" @click.stop="step(1)">
+    <button class="lp__arrow lp__arrow--right" tabindex="-1" type="button" @click.stop="step(1)">
       <span class="dv-ico dv-ico--chevron-right" aria-hidden="true" />
     </button>
   </div>
@@ -103,9 +119,15 @@ function onKeyDown(e: KeyboardEvent) {
   cursor: default;
 }
 
-.lp:focus-within {
+.lp:focus-within:not(.lp--disabled) {
   outline: 1px solid color-mix(in srgb, currentColor 35%, transparent);
   outline-offset: -1px;
+}
+
+.lp--disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .lp__arrow {

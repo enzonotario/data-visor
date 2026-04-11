@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ShikiTheme, ViewerLang } from 'data-visor-vue'
+import type { ShikiTheme, ViewerDisplayMode, ViewerLang } from 'data-visor-vue'
 import DataVisor from '../../../../packages/data-visor-vue/src/components/DataVisor/DataVisor.vue'
 
 defineProps<{
@@ -13,15 +13,16 @@ defineProps<{
   showToolbar: boolean
   showBreadcrumb: boolean
 }>()
+
+const viewerMode = defineModel<ViewerDisplayMode>('viewerMode', { required: true })
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col overflow-hidden p-1">
-    <div class="text-[10px] font-bold uppercase tracking-widest text-pg-muted">
-      Viewer
-    </div>
-    <div class="flex-1 overflow-auto relative">
+  <div class="flex-1 flex flex-col overflow-hidden p-1 min-w-0">
+    <div class="text-[10px] font-bold uppercase tracking-widest text-pg-muted mb-1">Viewer</div>
+    <div class="flex-1 overflow-auto relative min-h-0">
       <DataVisor
+        v-model:display-mode="viewerMode"
         :data="data"
         :lang="lang"
         :dark-theme="darkTheme"

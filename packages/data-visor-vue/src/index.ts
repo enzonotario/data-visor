@@ -11,5 +11,6 @@ export type {
   TreeNode,
   TreeObject,
   TreeValue,
+  ViewerDisplayMode,
   ViewerLang,
 } from './types/tree'

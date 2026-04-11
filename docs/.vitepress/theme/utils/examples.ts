@@ -136,3 +136,16 @@ export const LANG_EXAMPLE: Record<ViewerLang, string> = {
   yaml: YAML_EXAMPLE,
   xml: XML_EXAMPLE,
 }
+
+export const JSON_MINIFIED: string = JSON.stringify(JSON.parse(JSON_EXAMPLE))
+
+export const YAML_MINIFIED: string = JSON_MINIFIED
+
+export const XML_MINIFIED: string =
+  '<?xml version="1.0" encoding="UTF-8" ?><root><users><id>1</id><name>Alice</name><roles>admin</roles><roles>user</roles><meta><verified>true</verified><score>9.5</score></meta></users><users><id>2</id><name>Bob</name><roles>user</roles><meta><verified>false</verified><score>7.2</score></meta></users><users><id>3</id><name>Carlos</name><roles>moderator</roles><meta><verified>true</verified><score>8.1</score></meta></users><pagination><page>1</page><perPage>10</perPage><total>3</total></pagination><config><theme>dark</theme><locale>en-US</locale><features><search>true</search><export>false</export></features></config></root>'
+
+export const LANG_MINIFIED: Record<ViewerLang, string> = {
+  json: JSON_MINIFIED,
+  yaml: YAML_MINIFIED,
+  xml: XML_MINIFIED,
+}

@@ -12,7 +12,7 @@ Explore some practical examples using `DataVisor` with different formats and con
 
 The `data` prop is mandatory and must be a string. Set `lang` to `'json'`, `'yaml'`, or `'xml'` so DataVisor parses and highlights the document correctly (`json` is the default).
 
-The live demos below use the same sample dataset in three formats (see `$examples` in the docs theme).
+The live demos below use the same sample dataset in three formats (see `$examples` in the docs theme). For static minified strings used in tests or demos, see `$examples.ALL_MINIFIED` (or `JSON_MINIFIED`, `YAML_MINIFIED`, `XML_MINIFIED`). For an interactive **minified source** view, use the **Tree \| Minified** control in the toolbar, or `v-model:display-mode` from a parent. Without `v-model`, the toolbar still toggles the view internally (see [playground](/playground.html)).
 
 ```vue
 <script setup>
@@ -173,7 +173,7 @@ By default, the viewer has a maximum height of `600px` and will scroll internall
       :is-dark="$isDark.value"
       min-height="300px"
       max-height="500px"
-      initial-depth="1"
+      :initial-depth="1"
     />
   </div>
 </ClientOnly>

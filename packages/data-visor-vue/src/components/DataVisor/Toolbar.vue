@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ViewerDisplayMode } from '../../types/tree'
 import LevelPicker from './LevelPicker.vue'
 
 const props = defineProps<{
   isAwaitingChord: boolean
+  displayMode: ViewerDisplayMode
+  /** When true, expand / collapse / depth / search are inactive (minified view). */
+  treeActionsDisabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -12,6 +16,7 @@ const emit = defineEmits<{
   expandToDepth: [depth: number]
   toggleSearch: []
   copy: []
+  'update:displayMode': [mode: ViewerDisplayMode]
 }>()
 
 const copied = ref(false)
@@ -33,20 +38,28 @@ function handleCopy(e: MouseEvent) {
     tooltipStyle.value = null
   }, 1200)
 }
+
+function setDisplayMode(mode: ViewerDisplayMode) {
+  emit('update:displayMode', mode)
+}
 </script>
 
 <template>
   <div class="dv-toolbar" role="toolbar" aria-label="Viewer controls">
     <button
       class="dv-toolbar__btn"
+      type="button"
       title="Expand all (CTRL+] or CTRL+SHIFT++)"
+      :disabled="props.treeActionsDisabled"
       @click="emit('expandAll')"
     >
       <span class="dv-ico dv-ico--unfold-more-horizontal" aria-hidden="true" />
     </button>
     <button
       class="dv-toolbar__btn"
+      type="button"
       title="Collapse all (CTRL+[ or CTRL+SHIFT+-)"
+      :disabled="props.treeActionsDisabled"
       @click="emit('collapseAll')"
     >
       <span class="dv-ico dv-ico--unfold-less-horizontal" aria-hidden="true" />
@@ -54,13 +67,15 @@ function handleCopy(e: MouseEvent) {
 
     <span class="dv-toolbar__separator" />
 
-    <LevelPicker @select="emit('expandToDepth', $event)" />
+    <LevelPicker :disabled="props.treeActionsDisabled" @select="emit('expandToDepth', $event)" />
 
     <span class="dv-toolbar__separator" />
 
     <button
       class="dv-toolbar__btn"
+      type="button"
       title="Search (CTRL+F)"
+      :disabled="props.treeActionsDisabled"
       @click="emit('toggleSearch')"
     >
       <span class="dv-ico dv-ico--magnify" aria-hidden="true" />
@@ -68,7 +83,36 @@ function handleCopy(e: MouseEvent) {
 
     <span class="dv-toolbar__separator" />
 
-    <button class="dv-toolbar__btn" title="Copy" @click="handleCopy">
+    <div
+      class="dv-toolbar__segment"
+      role="radiogroup"
+      aria-label="Display mode"
+    >
+      <button
+        type="button"
+        class="dv-toolbar__segment-btn"
+        role="radio"
+        :aria-checked="props.displayMode === 'tree'"
+        :class="{ 'dv-toolbar__segment-btn--on': props.displayMode === 'tree' }"
+        @click="setDisplayMode('tree')"
+      >
+        Tree
+      </button>
+      <button
+        type="button"
+        class="dv-toolbar__segment-btn"
+        role="radio"
+        :aria-checked="props.displayMode === 'minified'"
+        :class="{ 'dv-toolbar__segment-btn--on': props.displayMode === 'minified' }"
+        @click="setDisplayMode('minified')"
+      >
+        Minified
+      </button>
+    </div>
+
+    <span class="dv-toolbar__separator" />
+
+    <button class="dv-toolbar__btn" type="button" title="Copy" @click="handleCopy">
       <span class="dv-ico dv-ico--content-copy" aria-hidden="true" />
     </button>
 

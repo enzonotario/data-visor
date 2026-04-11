@@ -11,7 +11,14 @@ import { useShiki } from '../../composables/useShiki'
 import { useTokenMap } from '../../composables/useTokenMap'
 import { useTree } from '../../composables/useTree'
 import { useVirtualScroll } from '../../composables/useVirtualScroll'
-import type { DataVisorEmit, DataVisorProps, ShikiTheme, TreeNode } from '../../types/tree'
+import type {
+  DataVisorEmit,
+  DataVisorProps,
+  ShikiTheme,
+  TreeNode,
+  ViewerDisplayMode,
+} from '../../types/tree'
+import { serializeMinified } from '../../utils/serializeMinified'
 import Breadcrumb from './Breadcrumb.vue'
 import { VIEWER_KEY } from './injectionKey'
 import SearchBar from './SearchBar.vue'
@@ -61,7 +68,16 @@ const props = withDefaults(defineProps<DataVisorProps>(), {
   showBreadcrumb: true,
 })
 
+/** Tree vs minified source; supports v-model:display-mode. Works without v-model (internal state). */
+const displayMode = defineModel<ViewerDisplayMode>('displayMode', { default: 'tree' })
+
 const emit = defineEmits<DataVisorEmit>()
+
+const isMinifiedMode = computed(() => displayMode.value === 'minified')
+
+function setDisplayModeFromToolbar(mode: ViewerDisplayMode) {
+  displayMode.value = mode
+}
 
 const dataRef = computed(() => props.data)
 const langRef = computed(() => props.lang)
@@ -111,6 +127,10 @@ const overlay = useSearchOverlay(search, expansion, vScroll, nodes, viewerRef, (
   searchBarRef.value?.focus(),
 )
 
+watch(isMinifiedMode, (m) => {
+  if (m) overlay.closeSearch()
+})
+
 const searchBarBind = computed(() => ({
   query: search.query.value,
   matchCount: search.matchIds.value.length,
@@ -151,9 +171,38 @@ provide(VIEWER_KEY, {
 })
 
 function copyContent() {
-  copy(props.data)
-  emit('copy', props.data)
+  const payload =
+    isMinifiedMode.value && !parseError.value
+      ? (serializeMinified(props.data, props.lang) ?? props.data)
+      : props.data
+  copy(payload)
+  emit('copy', payload)
 }
+
+const minifiedHtmlBlock = ref('')
+
+watch(
+  [() => props.data, () => props.lang, () => displayMode.value, currentTheme, parseError],
+  async () => {
+    if (!isMinifiedMode.value || parseError.value) {
+      minifiedHtmlBlock.value = ''
+      return
+    }
+    const text = serializeMinified(props.data, props.lang)
+    if (!text) {
+      minifiedHtmlBlock.value = ''
+      return
+    }
+    try {
+      // Do not watch `shiki.isReady`: `load()` toggles it and would re-trigger this watcher in a loop.
+      await shiki.load(currentTheme.value, props.lang, shikiPreloadThemes.value)
+      minifiedHtmlBlock.value = shiki.highlight(text, currentTheme.value, props.lang)
+    } catch {
+      minifiedHtmlBlock.value = ''
+    }
+  },
+  { immediate: true },
+)
 
 function onBreadcrumbSegmentClick(path: string) {
   expansion.expandPath(path, nodes.value)
@@ -167,6 +216,9 @@ function onSearchQueryUpdate(value: string) {
 }
 
 useEventListener(document, 'keydown', (e: KeyboardEvent) => {
+  if (displayMode.value === 'minified') {
+    return
+  }
   if (e.key === 'Escape' && overlay.searchOpen.value) {
     e.preventDefault()
     overlay.closeSearch()
@@ -204,6 +256,7 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
 
 const chord = useChordShortcut()
 chord.register({ ctrl: true, shift: true, key: '*' }, ([key]) => {
+  if (displayMode.value === 'minified') return
   const n = Number(key)
   if (!Number.isNaN(n)) {
     if (n === 0) expansion.collapseAll()
@@ -223,6 +276,7 @@ const hasViewerMinHeight = computed(
 )
 
 const usesClampedOuterHeight = computed(() => {
+  if (isMinifiedMode.value) return false
   if (parseError.value) return false
   if (usesIntrinsicListHeight.value) return false
   if (!hasViewerMinHeight.value) return false
@@ -266,7 +320,7 @@ const innerStyle = computed(() => {
     '--dv-bg': themeBg.value,
     '--dv-fg': themeFg.value,
   }
-  if (usesIntrinsicListHeight.value) {
+  if (usesIntrinsicListHeight.value && !isMinifiedMode.value) {
     s['--dv-list-min-height'] = `${vScroll.totalHeight.value}px`
   }
   return s
@@ -292,6 +346,9 @@ const innerStyle = computed(() => {
       <Toolbar
         v-if="props.showToolbar"
         :is-awaiting-chord="chord.isAwaitingSequence.value"
+        :display-mode="displayMode"
+        :tree-actions-disabled="isMinifiedMode"
+        @update:display-mode="setDisplayModeFromToolbar"
         @expand-all="expansion.expandAll()"
         @collapse-all="expansion.collapseAll()"
         @expand-to-depth="expansion.expandToDepth($event)"
@@ -300,7 +357,7 @@ const innerStyle = computed(() => {
       />
 
       <SearchBar
-        v-if="overlay.searchOpen.value && !overlay.searchAnchorPos.value"
+        v-if="!isMinifiedMode && overlay.searchOpen.value && !overlay.searchAnchorPos.value"
         ref="searchBarRef"
         v-bind="searchBarBind"
         @update:query="onSearchQueryUpdate"
@@ -310,7 +367,7 @@ const innerStyle = computed(() => {
       />
 
       <div
-        v-if="overlay.searchOpen.value && overlay.searchAnchorPos.value"
+        v-if="!isMinifiedMode && overlay.searchOpen.value && overlay.searchAnchorPos.value"
         class="dv-floating-search"
         :style="floatingSearchStyle"
       >
@@ -328,6 +385,16 @@ const innerStyle = computed(() => {
         {{ parseError }}
       </div>
 
+      <div
+        v-else-if="isMinifiedMode"
+        class="dv-source-minified"
+        tabindex="0"
+        role="region"
+        aria-label="Minified source"
+      >
+        <div class="dv-source-minified__inner" v-html="minifiedHtmlBlock" />
+      </div>
+
       <VirtualList
         v-else
         :visible-slice="vScroll.visibleSlice.value"
@@ -341,7 +408,7 @@ const innerStyle = computed(() => {
       />
 
       <Breadcrumb
-        v-if="props.showBreadcrumb"
+        v-if="props.showBreadcrumb && !isMinifiedMode"
         :node="hoveredNode"
         @segment-click="onBreadcrumbSegmentClick"
       />
@@ -382,6 +449,23 @@ const innerStyle = computed(() => {
   background: color-mix(in srgb, var(--dv-fg, #cdd6f4) 8%, var(--dv-bg, #1e1e2e));
 }
 
+.dv-source-minified {
+  @apply flex-1 min-h-0 overflow-auto;
+}
+
+.dv-viewer--intrinsic .dv-source-minified {
+  flex: 1 0 auto;
+}
+
+.dv-source-minified__inner :deep(pre.shiki) {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: break-spaces;
+  overflow-x: auto;
+}
+
 :deep(.dv-toolbar) {
   @apply flex items-center gap-1 px-2 py-1 flex-shrink-0 flex-wrap;
   background: color-mix(in srgb, var(--dv-bg, #1e1e2e) 85%, #000 15%);
@@ -403,10 +487,51 @@ const innerStyle = computed(() => {
   @apply inline-flex items-center justify-center bg-none border border-solid border-transparent rounded-[3px] text-inherit cursor-pointer text-sm px-1.5 py-1;
 }
 
-:deep(.dv-toolbar__btn:hover),
+:deep(.dv-toolbar__btn:hover:not(:disabled)),
 :deep(.dv-toolbar__btn--active) {
   border-color: color-mix(in srgb, var(--dv-fg, #cdd6f4) 30%, transparent);
   background: color-mix(in srgb, var(--dv-fg, #cdd6f4) 10%, var(--dv-bg, #1e1e2e));
+}
+
+:deep(.dv-toolbar__btn:disabled) {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+:deep(.dv-toolbar__segment) {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 1px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--dv-fg, #cdd6f4) 22%, transparent);
+  background: color-mix(in srgb, var(--dv-bg, #1e1e2e) 92%, #000 8%);
+}
+
+:deep(.dv-toolbar__segment-btn) {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+:deep(.dv-toolbar__segment-btn:hover) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--dv-fg, #cdd6f4) 8%, transparent);
+}
+
+:deep(.dv-toolbar__segment-btn--on) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--dv-fg, #cdd6f4) 16%, var(--dv-bg, #1e1e2e));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dv-fg, #cdd6f4) 18%, transparent);
 }
 
 :deep(.dv-toolbar__select) {
