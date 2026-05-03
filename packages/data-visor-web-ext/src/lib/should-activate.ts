@@ -30,6 +30,8 @@ function documentMime(doc: Pick<Document, 'contentType'>): string {
 /** MIME types that indicate a raw structured document (not HTML) even without a file extension in the URL. */
 function isStructuredDataMime(mime: string): boolean {
   if (!mime) return false
+  // Web pages served as XHTML match `application/*+xml` but must stay in the browser (like HTML).
+  if (mime === 'application/xhtml+xml') return false
   if (
     mime === 'application/json' ||
     mime === 'application/xml' ||

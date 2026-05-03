@@ -65,6 +65,12 @@ describe('shouldActivateForDocument', () => {
       shouldActivateForDocument('https://ex.com/v1/resource', doc('text/plain')),
     ).toBe(false)
   })
+
+  it('does not treat application/xhtml+xml as raw structured data', () => {
+    expect(
+      shouldActivateForDocument('https://ex.com/page', doc('application/xhtml+xml')),
+    ).toBe(false)
+  })
 })
 
 describe('wantsBrowserNativeView', () => {

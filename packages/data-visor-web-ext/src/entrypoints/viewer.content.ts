@@ -1,6 +1,4 @@
 import { createApp } from 'vue'
-import '@/assets/viewer-shell.css'
-import 'data-visor-vue/style.css'
 import ViewerApp from '@/components/ViewerApp.vue'
 import { uiColorMode } from '@/lib/color-mode-storage'
 import { detectLangFromPage } from '@/lib/detect-lang'
@@ -13,6 +11,18 @@ import {
   shouldActivateForDocument,
   wantsBrowserNativeView,
 } from '@/lib/should-activate'
+
+/** Appended only after `takeoverDocument` so Uno utilities (.flex, .hidden, …) never leak onto normal pages via manifest CSS injection. */
+async function appendViewerStyles(head: HTMLHeadElement): Promise<void> {
+  const [{ default: shell }, { default: vue }] = await Promise.all([
+    import('@/assets/viewer-shell.css?inline'),
+    import('data-visor-vue/style.css?inline'),
+  ])
+  const el = document.createElement('style')
+  el.setAttribute('data-dv-ext', '1')
+  el.textContent = `${shell}\n${vue}`
+  head.appendChild(el)
+}
 
 function takeoverDocument(): HTMLElement {
   const html = document.documentElement
@@ -54,6 +64,7 @@ export default defineContentScript({
     const initialDarkSyntaxTheme = normalizeDarkSyntaxTheme(rawDarkSyntax)
     const initialLightSyntaxTheme = normalizeLightSyntaxTheme(rawLightSyntax)
     const root = takeoverDocument()
+    await appendViewerStyles(document.head)
     const app = createApp(ViewerApp, {
       fullText,
       lang,
