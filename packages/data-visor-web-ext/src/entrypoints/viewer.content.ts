@@ -3,7 +3,7 @@ import '@/assets/viewer-shell.css'
 import 'data-visor-vue/style.css'
 import ViewerApp from '@/components/ViewerApp.vue'
 import { uiColorMode } from '@/lib/color-mode-storage'
-import { detectLangFromUrl } from '@/lib/detect-lang'
+import { detectLangFromPage } from '@/lib/detect-lang'
 import { extractPageText } from '@/lib/extract-text'
 import { VIEWER_MATCH_PATTERNS } from '@/lib/match-patterns'
 import { shikiDarkSyntaxTheme, shikiLightSyntaxTheme } from '@/lib/shiki-theme-storage'
@@ -45,7 +45,7 @@ export default defineContentScript({
     if (wantsBrowserNativeView(location.href)) return
     const fullText = extractPageText(document)
     if (fullText.length > MAX_TREE_CHARS) return
-    const lang = detectLangFromUrl(location.href)
+    const lang = detectLangFromPage(location.href, document)
     const [initialColorMode, rawDarkSyntax, rawLightSyntax] = await Promise.all([
       uiColorMode.getValue(),
       shikiDarkSyntaxTheme.getValue(),

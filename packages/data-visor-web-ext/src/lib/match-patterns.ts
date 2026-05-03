@@ -11,6 +11,9 @@ function patternsForExt(schemePrefix: string, ext: string): string[] {
 
 export function buildViewerMatchPatterns(): string[] {
   const list: string[] = []
+  // Any http(s) page: the script exits immediately unless the URL looks like a data file
+  // or the document MIME is JSON/XML/YAML (e.g. APIs without a filename extension).
+  list.push('http://*/*', 'https://*/*')
   for (const ext of EXTS) {
     list.push(...patternsForExt('*://*', ext))
   }

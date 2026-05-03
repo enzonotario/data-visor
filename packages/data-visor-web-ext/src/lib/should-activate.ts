@@ -27,12 +27,34 @@ function documentMime(doc: Pick<Document, 'contentType'>): string {
   return (doc.contentType ?? '').split(';')[0].trim().toLowerCase()
 }
 
+/** MIME types that indicate a raw structured document (not HTML) even without a file extension in the URL. */
+function isStructuredDataMime(mime: string): boolean {
+  if (!mime) return false
+  if (
+    mime === 'application/json' ||
+    mime === 'application/xml' ||
+    mime === 'text/xml' ||
+    mime === 'application/yaml' ||
+    mime === 'text/yaml' ||
+    mime === 'text/x-yaml' ||
+    mime === 'application/x-yaml'
+  ) {
+    return true
+  }
+  if (mime.startsWith('application/') && (mime.endsWith('+json') || mime.endsWith('+xml'))) {
+    return true
+  }
+  return false
+}
+
 export function shouldActivateForDocument(
   href: string,
   doc: Pick<Document, 'contentType'>,
 ): boolean {
-  if (!shouldActivateForUrl(href)) return false
   const mime = documentMime(doc)
   if (mime === 'text/html') return false
-  return true
+
+  if (shouldActivateForUrl(href)) return true
+
+  return isStructuredDataMime(mime)
 }

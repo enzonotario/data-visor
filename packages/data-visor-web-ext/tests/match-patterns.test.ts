@@ -12,7 +12,12 @@ describe('match-patterns', () => {
     expect(p).toContain('*://*/*/*/*/*/*.json')
   })
 
+  it('includes http(s) catch-all for MIME-based activation', () => {
+    expect(VIEWER_MATCH_PATTERNS).toContain('http://*/*')
+    expect(VIEWER_MATCH_PATTERNS).toContain('https://*/*')
+  })
+
   it('has expected size', () => {
-    expect(VIEWER_MATCH_PATTERNS.length).toBe(28 * 4 + 1)
+    expect(VIEWER_MATCH_PATTERNS.length).toBe(28 * 4 + 1 + 2)
   })
 })

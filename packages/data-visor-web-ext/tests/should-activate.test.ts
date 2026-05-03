@@ -53,6 +53,18 @@ describe('shouldActivateForDocument', () => {
   it('rejects non-matching URLs regardless of mime', () => {
     expect(shouldActivateForDocument('https://ex.com/page.html', doc('text/plain'))).toBe(false)
   })
+
+  it('activates extensionless API URLs when the document MIME is structured data', () => {
+    const href = 'https://api.argentinadatos.com/v1/finanzas/creditos/hipotecariosUva/'
+    expect(shouldActivateForDocument(href, doc('application/json'))).toBe(true)
+    expect(shouldActivateForDocument(href, doc('application/json; charset=utf-8'))).toBe(true)
+  })
+
+  it('does not activate extensionless URLs without a structured MIME', () => {
+    expect(
+      shouldActivateForDocument('https://ex.com/v1/resource', doc('text/plain')),
+    ).toBe(false)
+  })
 })
 
 describe('wantsBrowserNativeView', () => {
